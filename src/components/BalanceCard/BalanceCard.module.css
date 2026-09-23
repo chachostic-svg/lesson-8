@@ -1,0 +1,68 @@
+/* Контейнер карточки */
+.card {
+  background-color: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+  border-left: 4px solid var(--color-border);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Заголовок карточки */
+.title {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Сумма */
+.amount {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+/* Варианты цветов для разных типов */
+.income {
+  border-left-color: var(--color-income);
+}
+
+.income .amount {
+  color: var(--color-income);
+}
+
+.expense {
+  border-left-color: var(--color-expense);
+}
+
+.expense .amount {
+  color: var(--color-expense);
+}
+
+.balance {
+  border-left-color: var(--color-balance);
+}
+
+.balance .amount {
+  color: var(--color-balance);
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .card {
+    padding: var(--spacing-md);
+  }
+  
+  .amount {
+    font-size: var(--font-size-xl);
+  }
+}

@@ -1,0 +1,71 @@
+/* Контейнер заглушки */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-2xl) var(--spacing-lg);
+  min-height: 300px;
+}
+
+/* Иконка */
+.icon {
+  font-size: 64px;
+  margin-bottom: var(--spacing-lg);
+  opacity: 0.5;
+}
+
+/* Заголовок */
+.title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-sm);
+}
+
+/* Описание */
+.description {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-lg);
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+/* Кнопка действия */
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: var(--color-primary);
+  color: white;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.actionButton:hover {
+  background-color: var(--color-primary-hover);
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .emptyState {
+    padding: var(--spacing-xl) var(--spacing-md);
+    min-height: 250px;
+  }
+  
+  .icon {
+    font-size: 48px;
+  }
+  
+  .title {
+    font-size: var(--font-size-base);
+  }
+  
+  .description {
+    font-size: var(--font-size-sm);
+  }
+}
