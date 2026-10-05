@@ -145,5 +145,16 @@ Base path `/api/v1` (`server/src/app.js:19`).
   from before the backend existed — it is not wired into the current auth/API flow. Auth storage
   lives in `services/authService.js` instead.
 - Charts are recharts wrappers (`BarChart`, `PieChart`) fed by the `/summary/*` endpoints.
+- **`/summary/by-category` returns the raw category id in `name`** (`groceries`), not a label. `Analytics`
+  converts it before rendering (`decorateCategories` in `pages/Analytics/Analytics.jsx`): id → Russian label
+  from `utils/constants.js`, plus a colour keyed to the category's fixed position in that list so it doesn't
+  change when the ranking does. `PieChart` renders `name` verbatim in the slice label, the tooltip and the
+  legend, so handing it raw API data puts English ids into the Russian UI.
+- Both charts format money with `utils/formatters.js#formatCurrency`, which already appends `₽` — don't add
+  it a second time. A bare `Intl.NumberFormat('ru-RU')` defaults to 3 fraction digits and renders float sums
+  (the `amount` column is `REAL`) as `1 234,568`.
+- The period selector on `Analytics` covers **all three charts**: `PERIODS` there maps each id to a label, a
+  month count for the bar chart and a date range for the pies. Dates are formatted with a local-time helper
+  rather than `toISOString()`, which shifts the 1st of a month into the previous one east of UTC.
 - Comments and all user-facing strings are in Russian — keep it that way, including new API error
   messages.

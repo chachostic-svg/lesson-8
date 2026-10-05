@@ -9,8 +9,9 @@ import {
   ResponsiveContainer, 
   CartesianGrid 
 } from 'recharts'
+import { formatCurrency } from '../../utils/formatters'
 
-function BarChartComponent({ data, title }) {
+function BarChartComponent({ data }) {
   // Fallback для пустых данных
   const chartData = data || []
 
@@ -48,7 +49,7 @@ function BarChartComponent({ data, title }) {
             {label}
           </div>
           {payload.map((entry, index) => {
-            const formattedValue = new Intl.NumberFormat('ru-RU').format(entry.value)
+            const formattedValue = formatCurrency(entry.value)
             return (
               <div 
                 key={index}
@@ -66,7 +67,7 @@ function BarChartComponent({ data, title }) {
                   borderRadius: '2px'
                 }} />
                 <span style={{ color: '#6b7280' }}>
-                  {entry.name}: {formattedValue} ₽
+                  {entry.name}: {formattedValue}
                 </span>
               </div>
             )

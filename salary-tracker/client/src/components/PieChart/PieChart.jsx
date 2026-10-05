@@ -7,14 +7,10 @@ import {
   Legend, 
   ResponsiveContainer 
 } from 'recharts'
+import { formatCurrency } from '../../utils/formatters'
+import { CHART_COLORS } from '../../utils/constants'
 
-// Цвета для категорий
-const COLORS = [
-  '#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
-  '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#14b8a6'
-]
-
-function PieChartComponent({ data, title }) {
+function PieChartComponent({ data }) {
   // Fallback для пустых данных
   const chartData = data || []
 
@@ -37,11 +33,11 @@ function PieChartComponent({ data, title }) {
     )
   }
 
-  // Форматирование суммы в подсказке
+  // Подсказка: название категории, сумма и доля
   const renderTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
-      const data = payload[0]
-      const formattedValue = new Intl.NumberFormat('ru-RU').format(data.value)
+      const point = payload[0]
+      const percent = typeof point.percent === 'number' ? point.percent * 100 : null
       return (
         <div style={{
           backgroundColor: 'white',
@@ -51,50 +47,60 @@ function PieChartComponent({ data, title }) {
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
         }}>
           <div style={{ fontWeight: 600, marginBottom: '4px' }}>
-            {data.name}
+            {point.name}
           </div>
           <div style={{ color: '#6b7280' }}>
-            {formattedValue} ₽
+            {formatCurrency(point.value)}
           </div>
+          {percent !== null && (
+            <div style={{ color: '#9ca3af', fontSize: '12px', marginTop: '2px' }}>
+              {percent.toFixed(1)}% от суммы
+            </div>
+          )}
         </div>
       )
     }
     return null
   }
 
-  // Форматирование легенды
-  const renderLegend = (props) => {
-    const { payload } = props
+  // Легенда: цвет, название и сумма. Название берём из chartData по индексу,
+  // чтобы не зависеть от того, что recharts кладёт в payload.
+  const renderLegend = ({ payload }) => {
     return (
       <ul style={{ 
-        listStyle: 'none', 
-        padding: 0, 
+        listStyle: 'none',
+        padding: 0,
         margin: 0,
         display: 'flex',
         flexWrap: 'wrap',
         gap: '12px',
         justifyContent: 'center'
       }}>
-        {payload.map((entry, index) => (
-          <li 
-            key={`legend-${index}`}
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '6px',
-              fontSize: '14px',
-              color: '#6b7280'
-            }}
-          >
-            <div style={{
-              width: '12px',
-              height: '12px',
-              backgroundColor: entry.color,
-              borderRadius: '2px'
-            }} />
-            {entry.value}
-          </li>
-        ))}
+        {payload.map((entry, index) => {
+          const datum = chartData[index]
+          if (!datum) return null
+          return (
+            <li 
+              key={`legend-${datum.name || index}`}
+              style={{ 
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '14px',
+                color: '#6b7280'
+              }}
+            >
+              <div style={{
+                width: '12px',
+                height: '12px',
+                backgroundColor: datum.color || entry.color,
+                borderRadius: '2px'
+              }} />
+              {datum.name}
+              <span style={{ color: '#9ca3af' }}>{formatCurrency(datum.value)}</span>
+            </li>
+          )
+        })}
       </ul>
     )
   }
@@ -112,11 +118,12 @@ function PieChartComponent({ data, title }) {
             outerRadius={100}
             fill="#8884d8"
             dataKey="value"
+            nameKey="name"
           >
             {chartData.map((entry, index) => (
               <Cell 
-                key={`cell-${index}`} 
-                fill={COLORS[index % COLORS.length]} 
+                key={`cell-${entry.name || index}`} 
+                fill={entry.color || CHART_COLORS[index % CHART_COLORS.length]} 
               />
             ))}
           </Pie>
