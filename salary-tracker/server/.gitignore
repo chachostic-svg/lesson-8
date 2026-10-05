@@ -1,0 +1,10 @@
+# server/ не имел .gitignore, и его содержимое попадало в git целиком.
+# Особенно важно не коммитить .env — TURSO_AUTH_TOKEN это секрет.
+
+node_modules
+data.db
+
+# Файлы с секретами (TURSO_AUTH_TOKEN, JWT_SECRET)
+.env
+.env.local
+.env.*.local

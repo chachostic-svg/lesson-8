@@ -6,16 +6,16 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "db:schema": "node scripts/apply-schema.js"
   },
   "dependencies": {
+    "@libsql/client": "^0.18.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^18.0.5",
     "express": "^4.18.3",
     "jsonwebtoken": "^9.0.3",
-    "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
