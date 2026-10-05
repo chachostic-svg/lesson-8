@@ -26,6 +26,19 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 export PATH="$HOME/.turso:$PATH"
 
+# Если токены лежат в файле, подхватываем их, чтобы не передавать их в чате.
+# Ожидаемые имена: TURSO_API_KEY, VERCEL_TOKEN, GITHUB_TOKEN
+SECRETS_FILE="${SECRETS_FILE:-$HOME/.deploy-secrets.env}"
+if [ -f "$SECRETS_FILE" ]; then
+  info "Загружаю секреты из $SECRETS_FILE"
+  set -a
+  # shellcheck disable=SC1090
+  . "$SECRETS_FILE"
+  set +a
+fi
+
+GIT_REMOTE_URL="${GIT_REMOTE_URL:-$(git -C "$REPO_ROOT" remote get-url origin 2>/dev/null || true)}"
+
 info() { printf '\n\033[1;34m==> %s\033[0m\n' "$1"; }
 fail() { printf '\033[1;31mОшибка: %s\033[0m\n' "$1" >&2; exit 1; }
 
@@ -117,6 +130,15 @@ done
 # 6. Деплой
 info "Деплой в production"
 vercel deploy --prod --yes
+
+# 7. Привязка к GitHub, чтобы следующие пуши деплоились сами
+if [ -n "$GIT_REMOTE_URL" ]; then
+  info "Привязываю проект к репозиторию $GIT_REMOTE_URL"
+  vercel git connect "$GIT_REMOTE_URL" --yes || {
+    echo "⚠️  Не удалось привязать GitHub автоматически."
+    echo "   Сделайте это вручную: Project Settings -> Git -> Connect Git Repository"
+  }
+fi
 
 echo
 echo "Готово. Проверка:"
