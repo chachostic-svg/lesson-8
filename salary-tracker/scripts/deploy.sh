@@ -22,7 +22,10 @@ JWT_SECRET="${JWT_SECRET:-}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVER_DIR="$(cd "$SCRIPT_DIR/../server" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+# Корень git-репозитория — это каталог с vercel.json, он на уровень выше
+# salary-tracker: scripts -> salary-tracker -> корень репозитория.
+# Лишний ".." здесь отправлял бы vercel deploy в каталог над репозиторием.
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 export PATH="$HOME/.turso:$PATH"
 
@@ -134,8 +137,9 @@ info "Зависимости и схема"
 cd "$REPO_ROOT"
 
 info "Проект Vercel: $PROJECT_NAME"
+# У vercel project create в CLI 62 нет флага --yes, поэтому вызываем без него
 if ! vercel project inspect "$PROJECT_NAME" >/dev/null 2>&1; then
-  vercel project create "$PROJECT_NAME" --yes >/dev/null
+  vercel project create "$PROJECT_NAME" >/dev/null
   echo "Проект создан"
 else
   echo "Проект уже существует"
@@ -150,8 +154,19 @@ for pair in "TURSO_DATABASE_URL=$DB_URL" "TURSO_AUTH_TOKEN=$AUTH_TOKEN" "JWT_SEC
 done
 
 # 6. Деплой
+# Вывод сохраняем, чтобы показать его пользователю и вытащить реальный адрес:
+# имя проекта не обязано совпадать с доменом (здесь получилось salary-tracker-flame)
 info "Деплой в production"
-vercel deploy --prod --yes
+DEPLOY_LOG="$(mktemp)"
+trap 'rm -f "$DEPLOY_LOG"' EXIT
+if ! vercel deploy --prod --yes >"$DEPLOY_LOG" 2>&1; then
+  cat "$DEPLOY_LOG"
+  fail "vercel deploy завершился с ошибкой (лог выше)"
+fi
+cat "$DEPLOY_LOG"
+
+APP_URL="$(grep -oE 'https://[a-zA-Z0-9.-]+\.vercel\.app' "$DEPLOY_LOG" | tail -1)"
+[ -n "$APP_URL" ] || APP_URL="https://$PROJECT_NAME.vercel.app"
 
 # 7. Привязка к GitHub, чтобы следующие пуши деплоились сами
 if [ -n "$GIT_REMOTE_URL" ]; then
@@ -163,8 +178,9 @@ if [ -n "$GIT_REMOTE_URL" ]; then
 fi
 
 echo
-echo "Готово. Проверка:"
-echo "  curl -X POST https://$PROJECT_NAME.vercel.app/api/v1/auth/register \\"
+echo "Готово. Приложение: $APP_URL"
+echo "Проверка:"
+echo "  curl -X POST $APP_URL/api/v1/auth/register \\"
 echo "    -H 'Content-Type: application/json' \\"
 echo "    -d '{\"email\":\"test@example.com\",\"password\":\"secret123\",\"name\":\"Test\"}'"
 echo

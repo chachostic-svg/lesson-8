@@ -1,0 +1,12 @@
+# Зависимости Vercel ставит сам, локальные копии только раздувают загрузку
+node_modules
+**/node_modules
+
+.git
+.env
+**/.env
+*.db
+**/*.db
+
+# Пользовательский scratch-файл, в деплое не нужен
+salary-tracker/text.txt
